@@ -352,8 +352,13 @@
 
     // Initialize Supabase Client
     let supabaseClient = null;
-    if (window.supabase) {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+    } catch (error) {
+      console.error('Supabase client could not start:', error);
+      supabaseClient = null;
     }
 
     // Student profiles are loaded from the shared classroom Supabase project.
@@ -616,10 +621,22 @@
     let wbColor = '#0f172a';
 
     function boot() {
-      renderStudentGrid();
-      initWhiteboard();
-      loadSharedSetup();
-      window.addEventListener('online', flushOfflineQueue);
+      try {
+        renderStudentGrid();
+        initWhiteboard();
+        updateSaveStatus(
+          supabaseClient ? 'Connecting to shared profiles…' : 'Device mode ready',
+          supabaseClient ? 'saving' : 'local'
+        );
+        loadSharedSetup().catch(error => {
+          console.error('Shared setup failed:', error);
+          updateSaveStatus('Profiles ready — device autosave active', 'local');
+        });
+        window.addEventListener('online', flushOfflineQueue);
+      } catch (error) {
+        console.error('App startup error:', error);
+        updateSaveStatus('Profiles ready — device autosave active', 'local');
+      }
     }
 
     if (document.readyState === 'loading') {
@@ -634,7 +651,6 @@
       grid.innerHTML = '';
 
       if (!STUDENTS.length) {
-        grid.innerHTML = `<div class="col-span-full p-6 text-sm text-slate-500">Loading student profiles…</div>`;
         return;
       }
 
@@ -654,18 +670,22 @@
       });
     }
 
-    function selectStudent(studentId) {
-      activeStudentRecord = STUDENTS.find(s => s.id === studentId) || null;
-      activeStudent = activeStudentRecord?.first_name || null;
-      if (!activeStudentRecord) return;
+    function selectStudent(studentIdentifier) {
+      activeStudentRecord =
+        STUDENTS.find(s => s.id === studentIdentifier || s.first_name === studentIdentifier) ||
+        { id: `local-${String(studentIdentifier).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`, first_name: String(studentIdentifier) };
 
+      activeStudent = activeStudentRecord.first_name;
       document.getElementById('active-username').innerText = activeStudent;
       document.getElementById('user-avatar-initial').innerText = activeStudent.charAt(0);
       document.getElementById('active-profile-bar').classList.remove('hidden');
 
       studentStats = { totalSolved: 0, totalAttempts: 0, solveTimes: [] };
       updateStatsUI();
-      updateSaveStatus('Choose a stage to restore progress', 'local');
+      updateSaveStatus(
+        supabaseClient ? 'Choose a stage to restore progress' : 'Profile ready — device autosave active',
+        'local'
+      );
       showStageScreen();
     }
 
