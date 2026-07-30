@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSW Math Quest: Addition & Subtraction</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f8fafc;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+    }
+    canvas {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col bg-slate-50">
+
+  <!-- Header Section -->
+  <header class="bg-emerald-700 text-white shadow-sm sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="bg-white/10 p-2 rounded-lg text-xl">
+          <i class="fa-solid fa-calculator"></i>
+        </div>
+        <div>
+          <h1 class="text-lg md:text-xl font-bold leading-none tracking-tight">NSW Math Quest</h1>
+          <p class="text-xs text-emerald-100 mt-1 font-medium">Addition & Subtraction (Stage 2, 3 & 4)</p>
+        </div>
+      </div>
+
+      <!-- User Active Profile Indicator -->
+      <div id="active-profile-bar" class="hidden flex items-center space-x-3 bg-emerald-800/80 px-3 py-1.5 rounded-full border border-emerald-600">
+        <div class="w-7 h-7 rounded-full bg-amber-400 text-amber-950 font-bold flex items-center justify-center text-xs shadow-inner" id="user-avatar-initial">
+          ?
+        </div>
+        <div class="text-xs">
+          <div class="font-semibold leading-tight" id="active-username">Student</div>
+          <div class="text-[10px] text-emerald-200"><span id="active-stats">0 Solved</span> · <span id="header-save-status">Autosave on</span></div>
+        </div>
+        <button onclick="switchUser()" class="ml-1 text-xs bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded transition" title="Switch Student">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-grow max-w-6xl w-full mx-auto p-4 md:p-6 flex flex-col">
+
+    <!-- SCREEN 1: Student Profile Selection -->
+    <section id="screen-profile" class="flex-grow flex flex-col justify-center items-center py-4">
+      <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 max-w-3xl w-full text-center">
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-3">
+          <i class="fa-solid fa-user-graduate"></i>
+        </div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 mb-1">Welcome! Select Your Profile</h2>
+        <p class="text-sm text-slate-500 mb-6">Choose your name to start practice.</p>
+
+        <!-- Names Grid -->
+        <div id="student-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 max-h-96 overflow-y-auto p-3 custom-scrollbar border rounded-lg bg-slate-50/50">
+          <button type="button" onclick="selectStudent('Isabelle')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">I</div><span class="truncate text-xs font-semibold">Isabelle</span></button>
+          <button type="button" onclick="selectStudent('Malia')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">M</div><span class="truncate text-xs font-semibold">Malia</span></button>
+          <button type="button" onclick="selectStudent('Addison')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">A</div><span class="truncate text-xs font-semibold">Addison</span></button>
+          <button type="button" onclick="selectStudent('Simone')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">S</div><span class="truncate text-xs font-semibold">Simone</span></button>
+          <button type="button" onclick="selectStudent('Prashish')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">P</div><span class="truncate text-xs font-semibold">Prashish</span></button>
+          <button type="button" onclick="selectStudent('Samuel')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">S</div><span class="truncate text-xs font-semibold">Samuel</span></button>
+          <button type="button" onclick="selectStudent('Samrat')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">S</div><span class="truncate text-xs font-semibold">Samrat</span></button>
+          <button type="button" onclick="selectStudent('Vincent')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">V</div><span class="truncate text-xs font-semibold">Vincent</span></button>
+          <button type="button" onclick="selectStudent('Josias')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">J</div><span class="truncate text-xs font-semibold">Josias</span></button>
+          <button type="button" onclick="selectStudent('Logan')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">L</div><span class="truncate text-xs font-semibold">Logan</span></button>
+          <button type="button" onclick="selectStudent('Denise')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">D</div><span class="truncate text-xs font-semibold">Denise</span></button>
+          <button type="button" onclick="selectStudent('Skylah')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">S</div><span class="truncate text-xs font-semibold">Skylah</span></button>
+          <button type="button" onclick="selectStudent('Elizabeth')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">E</div><span class="truncate text-xs font-semibold">Elizabeth</span></button>
+          <button type="button" onclick="selectStudent('Charlie')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">C</div><span class="truncate text-xs font-semibold">Charlie</span></button>
+          <button type="button" onclick="selectStudent('Vase')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">V</div><span class="truncate text-xs font-semibold">Vase</span></button>
+          <button type="button" onclick="selectStudent('Brayden')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">B</div><span class="truncate text-xs font-semibold">Brayden</span></button>
+          <button type="button" onclick="selectStudent('Jordan')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">J</div><span class="truncate text-xs font-semibold">Jordan</span></button>
+          <button type="button" onclick="selectStudent('Miraya')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">M</div><span class="truncate text-xs font-semibold">Miraya</span></button>
+          <button type="button" onclick="selectStudent('Shayna')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">S</div><span class="truncate text-xs font-semibold">Shayna</span></button>
+          <button type="button" onclick="selectStudent('Felicia')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">F</div><span class="truncate text-xs font-semibold">Felicia</span></button>
+          <button type="button" onclick="selectStudent('Juana')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">J</div><span class="truncate text-xs font-semibold">Juana</span></button>
+          <button type="button" onclick="selectStudent('Lyn')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">L</div><span class="truncate text-xs font-semibold">Lyn</span></button>
+          <button type="button" onclick="selectStudent('Ithiel')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">I</div><span class="truncate text-xs font-semibold">Ithiel</span></button>
+          <button type="button" onclick="selectStudent('Daniel')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">D</div><span class="truncate text-xs font-semibold">Daniel</span></button>
+          <button type="button" onclick="selectStudent('Dantae')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">D</div><span class="truncate text-xs font-semibold">Dantae</span></button>
+          <button type="button" onclick="selectStudent('Ollie')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">O</div><span class="truncate text-xs font-semibold">Ollie</span></button>
+          <button type="button" onclick="selectStudent('Oliver')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">O</div><span class="truncate text-xs font-semibold">Oliver</span></button>
+          <button type="button" onclick="selectStudent('Prisha')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">P</div><span class="truncate text-xs font-semibold">Prisha</span></button>
+          <button type="button" onclick="selectStudent('JayJay')" class="p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">J</div><span class="truncate text-xs font-semibold">JayJay</span></button>
+        </div>
+
+        <div class="mt-6 text-xs text-slate-400 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-database text-emerald-600"></i>
+          Progress: <span id="save-status" class="text-slate-500 font-semibold">Loading profiles…</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: Stage & Level Selection -->
+    <section id="screen-levels" class="hidden flex-grow flex flex-col justify-center max-w-4xl mx-auto w-full">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">Select NSW Mathematics Stage</h2>
+        <p class="text-sm text-slate-600 mt-1">Choose the learning level you want to practice today</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Stage 2 Card -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:border-emerald-500 transition duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wide">Years 3 & 4</span>
+              <i class="fa-solid fa-shapes text-xl text-emerald-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Stage 2</h3>
+            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+              3 & 4 digit addition and subtraction, split/jump strategies, missing addends, and money calculations.
+            </p>
+            <ul class="text-xs text-slate-500 space-y-1.5 mb-6">
+              <li><i class="fa-solid fa-check text-emerald-600 mr-1.5"></i> 3 & 4 digit calculations</li>
+              <li><i class="fa-solid fa-check text-emerald-600 mr-1.5"></i> Mental jump & split strategies</li>
+              <li><i class="fa-solid fa-check text-emerald-600 mr-1.5"></i> Money sums ($)</li>
+            </ul>
+          </div>
+          <button onclick="selectStage('stage2')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition text-sm flex items-center justify-center gap-2">
+            Start Stage 2 <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+
+        <!-- Stage 3 Card -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:border-sky-500 transition duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <span class="bg-sky-100 text-sky-800 text-[11px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wide">Years 5 & 6</span>
+              <i class="fa-solid fa-cubes text-xl text-sky-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Stage 3</h3>
+            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+              Large whole numbers, decimals up to 2 decimal places, multi-step problem solving, and negative numbers.
+            </p>
+            <ul class="text-xs text-slate-500 space-y-1.5 mb-6">
+              <li><i class="fa-solid fa-check text-sky-600 mr-1.5"></i> Decimals (tenths & hundredths)</li>
+              <li><i class="fa-solid fa-check text-sky-600 mr-1.5"></i> Large numbers (up to 6 digits)</li>
+              <li><i class="fa-solid fa-check text-sky-600 mr-1.5"></i> Multi-step word problems</li>
+            </ul>
+          </div>
+          <button onclick="selectStage('stage3')" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition text-sm flex items-center justify-center gap-2">
+            Start Stage 3 <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+
+        <!-- Stage 4 Card -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:border-indigo-500 transition duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <span class="bg-indigo-100 text-indigo-800 text-[11px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wide">Years 7 & 8</span>
+              <i class="fa-solid fa-square-root-variable text-xl text-indigo-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Stage 4</h3>
+            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+              Directed numbers (integers), combining algebraic terms, and solving one-step linear equations.
+            </p>
+            <ul class="text-xs text-slate-500 space-y-1.5 mb-6">
+              <li><i class="fa-solid fa-check text-indigo-600 mr-1.5"></i> Positive & negative integers</li>
+              <li><i class="fa-solid fa-check text-indigo-600 mr-1.5"></i> Simplifying like terms</li>
+              <li><i class="fa-solid fa-check text-indigo-600 mr-1.5"></i> Solving linear equations</li>
+            </ul>
+          </div>
+          <button onclick="selectStage('stage4')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition text-sm flex items-center justify-center gap-2">
+            Start Stage 4 <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Switch Student Button -->
+      <div class="mt-6 text-center">
+        <button onclick="showProfileScreen()" class="text-xs text-slate-500 hover:text-slate-800 font-semibold underline">
+          &larr; Switch Student Profile
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: Active Gameplay -->
+    <section id="screen-game" class="hidden flex-grow flex flex-col lg:flex-row gap-5 items-start">
+      
+      <!-- Left Column: Problem Area -->
+      <div class="w-full lg:w-7/12 flex flex-col gap-4">
+        
+        <!-- Top Stats Bar -->
+        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <button onclick="showStageScreen()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded hover:bg-slate-100 transition" title="Back to stages">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div>
+              <span id="stage-badge" class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase">Stage 2</span>
+              <div class="text-[11px] text-slate-500 mt-0.5">Continuous Practice</div>
+            </div>
+          </div>
+
+          <!-- Timer & Solved Display -->
+          <div class="flex items-center space-x-4">
+            <div class="text-right">
+              <div class="text-[10px] uppercase font-semibold text-slate-400">Time Taken</div>
+              <div class="text-lg font-bold text-slate-800 font-mono" id="live-timer">0.0s</div>
+            </div>
+            <div class="h-7 w-px bg-slate-200"></div>
+            <div class="text-right">
+              <div class="text-[10px] uppercase font-semibold text-slate-400">Solved</div>
+              <div class="text-lg font-bold text-emerald-600" id="session-correct">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Math Question Card -->
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center relative overflow-hidden">
+          
+          <!-- Category Tag -->
+          <div id="question-category" class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            Addition Strategy
+          </div>
+
+          <!-- Question Display -->
+          <div id="question-text" class="text-2xl md:text-3xl font-extrabold text-slate-800 text-center my-4 min-h-[50px] flex items-center justify-center tracking-tight">
+            245 + 312 = ?
+          </div>
+
+          <!-- Input & Submit Form -->
+          <form id="answer-form" onsubmit="handleAnswerSubmit(event)" class="w-full max-w-xs mt-2 flex flex-col gap-3">
+            <div>
+              <input type="text" id="answer-input" autocomplete="off" placeholder="Type answer..." 
+                class="w-full text-center text-xl font-bold py-2.5 px-4 rounded-lg border-2 border-slate-300 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 transition">
+            </div>
+
+            <div class="flex gap-2">
+              <button type="button" onclick="toggleHintModal()" class="w-1/2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold py-2.5 px-3 rounded-lg transition flex items-center justify-center gap-1.5 text-xs">
+                <i class="fa-solid fa-lightbulb text-amber-500"></i> Need a Hint?
+              </button>
+              <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-3 rounded-lg shadow-sm transition text-xs flex items-center justify-center gap-1.5">
+                Submit <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </form>
+
+          <!-- Feedback Notification Banner -->
+          <div id="feedback-banner" class="hidden mt-4 w-full p-3 rounded-lg text-center text-xs font-semibold flex items-center justify-center gap-2">
+            <!-- Dynamic feedback -->
+          </div>
+        </div>
+
+        <!-- Quick Stats & Last Answer Summary -->
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 text-xs text-slate-600 flex flex-wrap justify-between items-center gap-2">
+          <div><i class="fa-solid fa-stopwatch text-slate-400 mr-1"></i> Last time: <span id="last-time" class="font-bold text-slate-800">--</span></div>
+          <div><i class="fa-solid fa-gauge-high text-slate-400 mr-1"></i> Avg speed: <span id="avg-time" class="font-bold text-slate-800">--</span></div>
+          <div><i class="fa-solid fa-bullseye text-slate-400 mr-1"></i> Profile Accuracy: <span id="accuracy-rate" class="font-bold text-slate-800">100%</span></div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Interactive Whiteboard / Scratchpad -->
+      <div class="w-full lg:w-5/12 bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col h-[480px]">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-pen-ruler text-emerald-600"></i>
+            <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wide">Working Out Whiteboard</h3>
+          </div>
+          <!-- Whiteboard Controls -->
+          <div class="flex items-center space-x-1.5">
+            <input type="color" id="wb-color" value="#0f172a" class="w-6 h-6 rounded border-0 cursor-pointer shadow-sm" title="Pen Color">
+            <button onclick="setWBTool('pen')" id="wb-pen-btn" class="p-1 px-2 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded hover:bg-emerald-200">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button onclick="setWBTool('eraser')" id="wb-erase-btn" class="p-1 px-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded hover:bg-slate-200">
+              <i class="fa-solid fa-eraser"></i>
+            </button>
+            <button onclick="clearWhiteboard()" class="p-1 px-2 bg-rose-50 text-rose-600 text-xs font-semibold rounded hover:bg-rose-100" title="Clear Grid">
+              <i class="fa-solid fa-trash-can"></i> Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="flex-grow w-full h-full bg-slate-50 border border-slate-200 rounded-lg relative overflow-hidden flex items-center justify-center">
+          <canvas id="whiteboard-canvas" class="w-full h-full cursor-crosshair"></canvas>
+          <div class="absolute bottom-2 right-2 text-[10px] text-slate-400 pointer-events-none bg-white/80 px-1.5 py-0.5 rounded">
+            Scratchpad
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modal: Guided Hint Modal -->
+  <div id="hint-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-100 relative">
+      <button onclick="toggleHintModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg font-bold">
+        &times;
+      </button>
+      
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-lightbulb"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Math Strategy Hint</h3>
+          <p class="text-xs text-slate-500">Step-by-step guidance to solve this question</p>
+        </div>
+      </div>
+
+      <div id="hint-content" class="bg-amber-50/60 border border-amber-200 rounded-lg p-3.5 text-slate-700 text-xs leading-relaxed space-y-1.5 mb-5">
+        <!-- Hint text dynamically rendered -->
+      </div>
+
+      <div class="text-[11px] text-slate-400 italic mb-4">
+        <i class="fa-solid fa-circle-info mr-1"></i> Try solving this using column working on the whiteboard!
+      </div>
+
+      <button onclick="toggleHintModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 rounded-lg transition text-xs">
+        Close Hint & Keep Trying
+      </button>
+    </div>
+  </div>
+
+  <!-- JavaScript Implementation -->
+  <script>
+    // Supabase Credentials
+    const SUPABASE_URL = "https://clktivheghgiffyugwuq.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_NhpAEoKa5RCzLKao3Up4dA_diLrt-bt";
+
+    // Initialize Supabase Client
+    let supabaseClient = null;
+    if (window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+
+    // Student profiles are loaded from the shared classroom Supabase project.
+    let STUDENTS = [];
+    let activeStudentRecord = null;
+    let mathQuestApp = null;
+    const APP_KEY = 'nsw-math-quest';
+    const LOCAL_PROGRESS_PREFIX = 'mathquest_progress_v2_';
+    const OFFLINE_QUEUE_KEY = 'mathquest_offline_queue_v2';
+
+    function safeGetJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    function safeSetJSON(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {}
+    }
+
+    function localProgressKey(studentId, stage) {
+      return `${LOCAL_PROGRESS_PREFIX}${studentId}_${stage}`;
+    }
+
+    function saveProgressLocally() {
+      if (!activeStudentRecord) return;
+      safeSetJSON(localProgressKey(activeStudentRecord.id, currentStage), {
+        totalSolved: studentStats.totalSolved || 0,
+        totalAttempts: studentStats.totalAttempts || 0,
+        solveTimes: studentStats.solveTimes || [],
+        updatedAt: new Date().toISOString()
+      });
+      updateSaveStatus('Saved on this device', 'local');
+    }
+
+    function loadLocalProgress(studentId, stage) {
+      return safeGetJSON(localProgressKey(studentId, stage), {
+        totalSolved: 0,
+        totalAttempts: 0,
+        solveTimes: []
+      });
+    }
+
+    async function loadSharedSetup() {
+      if (!supabaseClient) return;
+
+      const [{ data: students, error: studentsError }, { data: app, error: appError }] = await Promise.all([
+        supabaseClient
+          .from('students')
+          .select('id,first_name,display_order,active')
+          .eq('active', true)
+          .order('display_order'),
+        supabaseClient
+          .from('apps')
+          .select('id,app_key,app_name,subject,active')
+          .eq('app_key', APP_KEY)
+          .maybeSingle()
+      ]);
+
+      if (studentsError) {
+        console.error('Student loading error:', studentsError);
+        updateSaveStatus('Student profiles could not load', 'error');
+      } else {
+        STUDENTS = students || [];
+        renderStudentGrid();
+      }
+
+      if (appError) console.error('App loading error:', appError);
+      mathQuestApp = app || null;
+
+      if (!mathQuestApp) {
+        updateSaveStatus('Run setup.sql once in Supabase', 'error');
+      }
+
+      await flushOfflineQueue();
+    }
+
+    function updateSaveStatus(message, type = 'saved') {
+      const el = document.getElementById('save-status');
+      const headerEl = document.getElementById('header-save-status');
+      if (headerEl) headerEl.textContent = message;
+      if (!el) return;
+      el.textContent = message;
+      el.className = type === 'error'
+        ? 'text-rose-600 font-semibold'
+        : type === 'saving'
+          ? 'text-amber-600 font-semibold'
+          : type === 'local'
+            ? 'text-sky-600 font-semibold'
+            : 'text-emerald-700 font-semibold';
+    }
+
+    async function restoreCloudProgress(studentId, stage) {
+      const local = loadLocalProgress(studentId, stage);
+      studentStats = {
+        totalSolved: local.totalSolved || 0,
+        totalAttempts: local.totalAttempts || 0,
+        solveTimes: Array.isArray(local.solveTimes) ? local.solveTimes : []
+      };
+      updateStatsUI();
+
+      if (!supabaseClient || !mathQuestApp) return;
+
+      updateSaveStatus('Loading saved progress…', 'saving');
+      const { data, error } = await supabaseClient
+        .from('student_results')
+        .select('score,max_score,response_data,completed_at')
+        .eq('student_id', studentId)
+        .eq('app_id', mathQuestApp.id)
+        .eq('activity_name', `Math Quest ${stage}`)
+        .order('completed_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Progress restore error:', error);
+        updateSaveStatus('Using progress saved on this device', 'local');
+        return;
+      }
+
+      const latest = data && data[0];
+      const saved = latest?.response_data?.progress;
+      if (saved) {
+        studentStats = {
+          totalSolved: saved.totalSolved || 0,
+          totalAttempts: saved.totalAttempts || 0,
+          solveTimes: Array.isArray(saved.solveTimes) ? saved.solveTimes : []
+        };
+        safeSetJSON(localProgressKey(studentId, stage), studentStats);
+        updateStatsUI();
+      }
+      updateSaveStatus('Progress restored', 'saved');
+    }
+
+    async function saveAttemptAndProgress(attempt) {
+      if (!activeStudentRecord || !mathQuestApp) {
+        queueOfflineAttempt(attempt);
+        saveProgressLocally();
+        return;
+      }
+
+      const completedAt = new Date().toISOString();
+      const payload = {
+        student_id: activeStudentRecord.id,
+        app_id: mathQuestApp.id,
+        activity_id: null,
+        activity_name: `Math Quest ${currentStage}`,
+        score: studentStats.totalSolved || 0,
+        max_score: studentStats.totalAttempts || 0,
+        stage: Number(currentStage.replace('stage', '')) || null,
+        duration_seconds: Math.round(attempt.response_time_seconds || 0),
+        attempted_answers: studentStats.totalAttempts || 0,
+        correct_answers: studentStats.totalSolved || 0,
+        strengths: attempt.is_correct ? [attempt.category] : [],
+        needs_support: attempt.is_correct ? [] : [attempt.category],
+        response_data: {
+          activity_key: APP_KEY,
+          activity_name: `Math Quest ${currentStage}`,
+          latest_attempt: attempt,
+          progress: {
+            totalSolved: studentStats.totalSolved || 0,
+            totalAttempts: studentStats.totalAttempts || 0,
+            solveTimes: studentStats.solveTimes || [],
+            accuracy: studentStats.totalAttempts
+              ? Math.round((studentStats.totalSolved / studentStats.totalAttempts) * 100)
+              : 100
+          }
+        },
+        completed_at: completedAt
+      };
+
+      saveProgressLocally();
+      updateSaveStatus('Saving progress…', 'saving');
+
+      const { error } = await supabaseClient.from('student_results').insert(payload);
+      if (error) {
+        console.error('Autosave error:', error);
+        queueOfflineAttempt(attempt);
+        updateSaveStatus('Saved on device — will retry online', 'local');
+        return;
+      }
+
+      updateSaveStatus(`Autosaved ${new Intl.DateTimeFormat('en-AU', {
+        hour: 'numeric', minute: '2-digit', hour12: true
+      }).format(new Date(completedAt))}`, 'saved');
+    }
+
+    function queueOfflineAttempt(attempt) {
+      const queue = safeGetJSON(OFFLINE_QUEUE_KEY, []);
+      queue.push({
+        student_id: activeStudentRecord?.id || null,
+        stage: currentStage,
+        attempt,
+        progress: studentStats,
+        queued_at: new Date().toISOString()
+      });
+      safeSetJSON(OFFLINE_QUEUE_KEY, queue.slice(-200));
+    }
+
+    async function flushOfflineQueue() {
+      if (!supabaseClient || !mathQuestApp || !navigator.onLine) return;
+      const queue = safeGetJSON(OFFLINE_QUEUE_KEY, []);
+      if (!queue.length) return;
+
+      const remaining = [];
+      for (const item of queue) {
+        if (!item.student_id) continue;
+        const payload = {
+          student_id: item.student_id,
+          app_id: mathQuestApp.id,
+          activity_id: null,
+          activity_name: `Math Quest ${item.stage}`,
+          score: item.progress?.totalSolved || 0,
+          max_score: item.progress?.totalAttempts || 0,
+          stage: Number(String(item.stage).replace('stage', '')) || null,
+          duration_seconds: Math.round(item.attempt?.response_time_seconds || 0),
+          attempted_answers: item.progress?.totalAttempts || 0,
+          correct_answers: item.progress?.totalSolved || 0,
+          strengths: item.attempt?.is_correct ? [item.attempt?.category || ''] : [],
+          needs_support: item.attempt?.is_correct ? [] : [item.attempt?.category || ''],
+          response_data: {
+            activity_key: APP_KEY,
+            activity_name: `Math Quest ${item.stage}`,
+            latest_attempt: item.attempt,
+            progress: item.progress,
+            queued_at: item.queued_at
+          },
+          completed_at: item.queued_at
+        };
+
+        const { error } = await supabaseClient.from('student_results').insert(payload);
+        if (error) remaining.push(item);
+      }
+
+      safeSetJSON(OFFLINE_QUEUE_KEY, remaining);
+      if (!remaining.length) updateSaveStatus('Offline progress synced', 'saved');
+    }
+      return uid;
+    }
+
+    // State Variables
+    let activeStudent = null;
+    let classCode = 'NSW-MATH-STAGE24';
+    let gameId = 'nsw-math-quest';
+    let studentStats = { totalSolved: 0, totalAttempts: 0, solveTimes: [] };
+    
+    let currentStage = 'stage2';
+    let currentQuestion = null;
+    let timerStartTime = 0;
+    let timerInterval = null;
+    let elapsedSeconds = 0;
+
+    // Whiteboard state
+    let wbCanvas = null;
+    let wbCtx = null;
+    let isDrawing = false;
+    let wbTool = 'pen';
+    let wbColor = '#0f172a';
+
+    function boot() {
+      renderStudentGrid();
+      initWhiteboard();
+      loadSharedSetup();
+      window.addEventListener('online', flushOfflineQueue);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot);
+    } else {
+      boot();
+    }
+
+    function renderStudentGrid() {
+      const grid = document.getElementById('student-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      if (!STUDENTS.length) {
+        grid.innerHTML = `<div class="col-span-full p-6 text-sm text-slate-500">Loading student profiles…</div>`;
+        return;
+      }
+
+      STUDENTS.forEach(student => {
+        const name = student.first_name;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = "p-2.5 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-lg font-medium text-slate-700 hover:text-emerald-800 transition flex items-center space-x-2 text-left";
+        btn.onclick = () => selectStudent(student.id);
+        btn.innerHTML = `
+          <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold shrink-0">
+            ${name.charAt(0)}
+          </div>
+          <span class="truncate text-xs font-semibold">${name}</span>
+        `;
+        grid.appendChild(btn);
+      });
+    });
+    }
+
+    function selectStudent(studentId) {
+      activeStudentRecord = STUDENTS.find(s => s.id === studentId) || null;
+      activeStudent = activeStudentRecord?.first_name || null;
+      if (!activeStudentRecord) return;
+
+      document.getElementById('active-username').innerText = activeStudent;
+      document.getElementById('user-avatar-initial').innerText = activeStudent.charAt(0);
+      document.getElementById('active-profile-bar').classList.remove('hidden');
+
+      studentStats = { totalSolved: 0, totalAttempts: 0, solveTimes: [] };
+      updateStatsUI();
+      updateSaveStatus('Choose a stage to restore progress', 'local');
+      showStageScreen();
+    }
+
+    function switchUser() {
+      activeStudent = null;
+      activeStudentRecord = null;
+      document.getElementById('active-profile-bar').classList.add('hidden');
+      stopTimer();
+      showProfileScreen();
+    }
+
+    function updateStatsUI() {
+      document.getElementById('active-stats').innerText = `${studentStats.totalSolved || 0} Solved`;
+      document.getElementById('session-correct').innerText = studentStats.totalSolved || 0;
+
+      const acc = studentStats.totalAttempts > 0 
+        ? Math.round(((studentStats.totalSolved || 0) / studentStats.totalAttempts) * 100) 
+        : 100;
+      document.getElementById('accuracy-rate').innerText = `${acc}%`;
+
+      if (studentStats.solveTimes && studentStats.solveTimes.length > 0) {
+        const avg = (studentStats.solveTimes.reduce((a, b) => a + b, 0) / studentStats.solveTimes.length).toFixed(1);
+        document.getElementById('avg-time').innerText = `${avg}s`;
+      } else {
+        document.getElementById('avg-time').innerText = `--`;
+      }
+    }
+
+    function showProfileScreen() {
+      document.getElementById('screen-profile').classList.remove('hidden');
+      document.getElementById('screen-levels').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+    }
+
+    function showStageScreen() {
+      document.getElementById('screen-profile').classList.add('hidden');
+      document.getElementById('screen-levels').classList.remove('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      stopTimer();
+    }
+
+    function selectStage(stage) {
+      currentStage = stage;
+      document.getElementById('screen-levels').classList.add('hidden');
+      document.getElementById('screen-game').classList.remove('hidden');
+
+      const badge = document.getElementById('stage-badge');
+      if (stage === 'stage2') {
+        badge.innerText = 'Stage 2 (Yrs 3-4)';
+        badge.className = 'bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase';
+      } else if (stage === 'stage3') {
+        badge.innerText = 'Stage 3 (Yrs 5-6)';
+        badge.className = 'bg-sky-100 text-sky-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase';
+      } else {
+        badge.innerText = 'Stage 4 (Yrs 7-8)';
+        badge.className = 'bg-indigo-100 text-indigo-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase';
+      }
+
+      restoreCloudProgress(activeStudentRecord.id, currentStage).finally(() => {
+        setTimeout(() => resizeCanvas(), 50);
+        generateNewQuestion();
+      });
+    }
+
+    function generateNewQuestion() {
+      hideFeedback();
+      const input = document.getElementById('answer-input');
+      input.value = '';
+      input.focus();
+
+      let q = {};
+      if (currentStage === 'stage2') {
+        q = generateStage2Question();
+      } else if (currentStage === 'stage3') {
+        q = generateStage3Question();
+      } else {
+        q = generateStage4Question();
+      }
+
+      currentQuestion = q;
+      document.getElementById('question-category').innerText = q.category;
+      document.getElementById('question-text').innerHTML = q.display;
+      document.getElementById('hint-content').innerHTML = q.hint;
+
+      startTimer();
+    }
+
+    function generateStage2Question() {
+      const type = Math.floor(Math.random() * 4);
+      if (type === 0) {
+        const a = Math.floor(Math.random() * 800) + 100;
+        const b = Math.floor(Math.random() * 800) + 100;
+        return {
+          rawText: `${a} + ${b} = ?`,
+          display: `${a} + ${b} = ?`,
+          answer: (a + b).toString(),
+          category: 'Stage 2: 3-Digit Addition',
+          hint: `<strong>Jump Strategy:</strong> Start at <strong>${a}</strong>. First add hundreds (+${Math.floor(b/100)*100}), then add tens (+${Math.floor((b%100)/10)*10}), and then units (+${b%10}).`
+        };
+      } else if (type === 1) {
+        const a = Math.floor(Math.random() * 2000) + 500;
+        const b = Math.floor(Math.random() * (a - 100)) + 100;
+        return {
+          rawText: `${a} - ${b} = ?`,
+          display: `${a} - ${b} = ?`,
+          answer: (a - b).toString(),
+          category: 'Stage 2: Subtraction',
+          hint: `<strong>Split Strategy:</strong> First subtract ${Math.floor(b/100)*100} from ${a}. Or count up from <strong>${b}</strong> to <strong>${a}</strong> using the whiteboard!`
+        };
+      } else if (type === 2) {
+        const price1 = (Math.floor(Math.random() * 3000) + 100) / 100;
+        const price2 = (Math.floor(Math.random() * 2000) + 100) / 100;
+        return {
+          rawText: `$${price1.toFixed(2)} + $${price2.toFixed(2)} = ?`,
+          display: `$${price1.toFixed(2)} + $${price2.toFixed(2)} = ?`,
+          answer: (price1 + price2).toFixed(2),
+          category: 'Stage 2: Money & Decimals',
+          hint: `Add whole dollars ($${Math.floor(price1)} + $${Math.floor(price2)}) first, then add cents (${Math.round((price1%1)*100)}c + ${Math.round((price2%1)*100)}c).`
+        };
+      } else {
+        const a = Math.floor(Math.random() * 300) + 100;
+        const ans = Math.floor(Math.random() * 400) + 100;
+        return {
+          rawText: `${a} + ? = ${a + ans}`,
+          display: `${a} + <span class="text-emerald-600 font-bold underline px-1">?</span> = ${a + ans}`,
+          answer: ans.toString(),
+          category: 'Stage 2: Missing Addends',
+          hint: `Use the inverse operation: calculate <strong>${a + ans} - ${a}</strong> on your whiteboard!`
+        };
+      }
+    }
+
+    function generateStage3Question() {
+      const type = Math.floor(Math.random() * 4);
+      if (type === 0) {
+        const a = (Math.floor(Math.random() * 9000) / 100) + 10;
+        const b = (Math.floor(Math.random() * 5000) / 100) + 5;
+        const isAdd = Math.random() > 0.5;
+        const ans = isAdd ? (a + b).toFixed(2) : (a - b).toFixed(2);
+        return {
+          rawText: `${a.toFixed(2)} ${isAdd ? '+' : '-'} ${b.toFixed(2)} = ?`,
+          display: `${a.toFixed(2)} ${isAdd ? '+' : '-'} ${b.toFixed(2)} = ?`,
+          answer: parseFloat(ans).toString(),
+          category: 'Stage 3: Decimals',
+          hint: `Align decimal points vertically on your whiteboard so tenths match with tenths and hundredths with hundredths.`
+        };
+      } else if (type === 1) {
+        const a = Math.floor(Math.random() * 850000) + 150000;
+        const b = Math.floor(Math.random() * 450000) + 50000;
+        return {
+          rawText: `${a} + ${b} = ?`,
+          display: `${a.toLocaleString()} + ${b.toLocaleString()} = ?`,
+          answer: (a + b).toString(),
+          category: 'Stage 3: Large Numbers',
+          hint: `Use column addition on the whiteboard. Add starting from the ones column on the far right.`
+        };
+      } else if (type === 2) {
+        const startTemp = Math.floor(Math.random() * 10) + 1;
+        const drop = Math.floor(Math.random() * 15) + 5;
+        return {
+          rawText: `Temperature drops from ${startTemp}°C by ${drop}°C. New temp?`,
+          display: `The temperature is ${startTemp}°C and drops by ${drop}°C. What is the new temperature?`,
+          answer: (startTemp - drop).toString(),
+          category: 'Stage 3: Directed Numbers',
+          hint: `Start at <strong>${startTemp}</strong> and count back <strong>${drop}</strong> steps. When you go below 0, numbers become negative (-1, -2, -3...).`
+        };
+      } else {
+        const a = Math.floor(Math.random() * 200) + 100;
+        const b = Math.floor(Math.random() * 100) + 50;
+        const c = Math.floor(Math.random() * 80) + 20;
+        return {
+          rawText: `${a} + ${b} - ${c} = ?`,
+          display: `${a} + ${b} - ${c} = ?`,
+          answer: (a + b - c).toString(),
+          category: 'Stage 3: Multi-Step Operations',
+          hint: `Work left to right: first add <strong>${a} + ${b}</strong>, then subtract <strong>${c}</strong> from the result.`
+        };
+      }
+    }
+
+    function generateStage4Question() {
+      const type = Math.floor(Math.random() * 4);
+      if (type === 0) {
+        const a = Math.floor(Math.random() * 30) - 15;
+        const b = Math.floor(Math.random() * 30) - 15;
+        const isAdd = Math.random() > 0.5;
+        const ans = isAdd ? a + b : a - b;
+        const bDisplay = b < 0 ? `(${b})` : `${b}`;
+        return {
+          rawText: `${a} ${isAdd ? '+' : '-'} ${bDisplay} = ?`,
+          display: `${a} ${isAdd ? '+' : '-'} ${bDisplay} = ?`,
+          answer: ans.toString(),
+          category: 'Stage 4: Integers',
+          hint: `Remember integer sign rules: <em>+ (-x) = -x</em> and <em>- (-x) = +x</em>.`
+        };
+      } else if (type === 1) {
+        const a = Math.floor(Math.random() * 40) - 20;
+        const x = Math.floor(Math.random() * 30) - 10;
+        const b = x + a;
+        const aSign = a >= 0 ? `+ ${a}` : `- ${Math.abs(a)}`;
+        return {
+          rawText: `x ${aSign} = ${b}`,
+          display: `Solve for x: &nbsp; x ${aSign} = ${b}`,
+          answer: x.toString(),
+          category: 'Stage 4: Linear Equations',
+          hint: `Isolate <strong>x</strong> by doing the inverse operation to both sides of the equation (${a >= 0 ? `subtract ${a}` : `add ${Math.abs(a)}`} from ${b}).`
+        };
+      } else if (type === 2) {
+        const coeff1 = Math.floor(Math.random() * 12) + 2;
+        const coeff2 = Math.floor(Math.random() * 10) + 1;
+        const isAdd = Math.random() > 0.5;
+        const ans = isAdd ? coeff1 + coeff2 : coeff1 - coeff2;
+        return {
+          rawText: `${coeff1}a ${isAdd ? '+' : '-'} ${coeff2}a = ?a`,
+          display: `Simplify: &nbsp; ${coeff1}a ${isAdd ? '+' : '-'} ${coeff2}a = <span class="text-indigo-600 underline">?</span>a`,
+          answer: ans.toString(),
+          category: 'Stage 4: Algebraic Terms',
+          hint: `Combine like terms by adding or subtracting coefficients: compute <strong>${coeff1} ${isAdd ? '+' : '-'} ${coeff2}</strong>.`
+        };
+      } else {
+        const a = Math.floor(Math.random() * 20) + 5;
+        const b = Math.floor(Math.random() * 30) + 15;
+        const c = Math.floor(Math.random() * 20) - 10;
+        const cDisplay = c < 0 ? `(${c})` : `${c}`;
+        return {
+          rawText: `(${a} - ${b}) + ${cDisplay} = ?`,
+          display: `(${a} - ${b}) + ${cDisplay} = ?`,
+          answer: ((a - b) + c).toString(),
+          category: 'Stage 4: Order of Operations',
+          hint: `Perform the expression inside brackets first: <strong>(${a} - ${b})</strong>, then add <strong>${cDisplay}</strong>.`
+        };
+      }
+    }
+
+    function startTimer() {
+      stopTimer();
+      timerStartTime = Date.now();
+      timerInterval = setInterval(() => {
+        elapsedSeconds = (Date.now() - timerStartTime) / 1000;
+        document.getElementById('live-timer').innerText = `${elapsedSeconds.toFixed(1)}s`;
+      }, 100);
+    }
+
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+    }
+
+    async function handleAnswerSubmit(e) {
+      e.preventDefault();
+      const rawInput = document.getElementById('answer-input').value.trim();
+      if (!rawInput) return;
+
+      stopTimer();
+      studentStats.totalAttempts = (studentStats.totalAttempts || 0) + 1;
+
+      const cleanedInput = rawInput.replace('$', '').replace(/\s+/g, '');
+      const expectedAnswer = currentQuestion.answer.toString().replace('$', '').replace(/\s+/g, '');
+      const isCorrect = (cleanedInput === expectedAnswer);
+      const solveTime = parseFloat(elapsedSeconds.toFixed(1));
+      const attemptRow = {
+        stage: currentStage,
+        category: currentQuestion.category || '',
+        question_text: currentQuestion.rawText || currentQuestion.display,
+        submitted_answer: rawInput,
+        correct_answer: currentQuestion.answer.toString(),
+        is_correct: isCorrect,
+        response_time_seconds: solveTime,
+        attempted_at: new Date().toISOString()
+      };
+
+      if (isCorrect) {
+        document.getElementById('last-time').innerText = `${solveTime}s`;
+        studentStats.totalSolved = (studentStats.totalSolved || 0) + 1;
+        if (!studentStats.solveTimes) studentStats.solveTimes = [];
+        studentStats.solveTimes.push(solveTime);
+
+        updateStatsUI();
+        saveProgressLocally();
+        saveAttemptAndProgress(attemptRow);
+        showFeedback(true, `Correct! Solved in ${solveTime}s 🎉`);
+
+        setTimeout(() => {
+          generateNewQuestion();
+        }, 1500);
+
+      } else {
+        updateStatsUI();
+        saveProgressLocally();
+        saveAttemptAndProgress(attemptRow);
+        showFeedback(false, `Not quite! Use the whiteboard or click "Need a Hint?".`);
+        
+        timerStartTime = Date.now() - (elapsedSeconds * 1000);
+        timerInterval = setInterval(() => {
+          elapsedSeconds = (Date.now() - timerStartTime) / 1000;
+          document.getElementById('live-timer').innerText = `${elapsedSeconds.toFixed(1)}s`;
+        }, 100);
+      }
+    }
+
+    function showFeedback(isSuccess, text) {
+      const banner = document.getElementById('feedback-banner');
+      banner.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-900', 'bg-rose-100', 'text-rose-900');
+      
+      if (isSuccess) {
+        banner.classList.add('bg-emerald-100', 'text-emerald-900');
+        banner.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i> ${text}`;
+      } else {
+        banner.classList.add('bg-rose-100', 'text-rose-900');
+        banner.innerHTML = `<i class="fa-solid fa-circle-xmark text-base"></i> ${text}`;
+      }
+    }
+
+    function hideFeedback() {
+      document.getElementById('feedback-banner').classList.add('hidden');
+    }
+
+    function toggleHintModal() {
+      const modal = document.getElementById('hint-modal');
+      modal.classList.toggle('hidden');
+    }
+
+    function initWhiteboard() {
+      wbCanvas = document.getElementById('whiteboard-canvas');
+      if (!wbCanvas) return;
+      wbCtx = wbCanvas.getContext('2d');
+
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      document.getElementById('wb-color')?.addEventListener('input', (e) => {
+        wbColor = e.target.value;
+        if (wbTool === 'pen') wbCtx.strokeStyle = wbColor;
+      });
+
+      wbCanvas.addEventListener('mousedown', startDrawing);
+      wbCanvas.addEventListener('mousemove', draw);
+      wbCanvas.addEventListener('mouseup', stopDrawing);
+      wbCanvas.addEventListener('mouseleave', stopDrawing);
+
+      wbCanvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startDrawing(e.touches[0]);
+      }, { passive: false });
+
+      wbCanvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        draw(e.touches[0]);
+      }, { passive: false });
+
+      wbCanvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function resizeCanvas() {
+      if (!wbCanvas || !wbCanvas.parentElement) return;
+      const rect = wbCanvas.parentElement.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      wbCanvas.width = rect.width;
+      wbCanvas.height = rect.height;
+      clearWhiteboard();
+    }
+
+    function setWBTool(tool) {
+      wbTool = tool;
+      const penBtn = document.getElementById('wb-pen-btn');
+      const eraseBtn = document.getElementById('wb-erase-btn');
+
+      if (tool === 'pen') {
+        penBtn.className = "p-1 px-2 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded hover:bg-emerald-200";
+        eraseBtn.className = "p-1 px-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded hover:bg-slate-200";
+      } else {
+        eraseBtn.className = "p-1 px-2 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded hover:bg-emerald-200";
+        penBtn.className = "p-1 px-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded hover:bg-slate-200";
+      }
+    }
+
+    function getCanvasCoords(e) {
+      const rect = wbCanvas.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+
+    function startDrawing(e) {
+      isDrawing = true;
+      const pos = getCanvasCoords(e);
+      wbCtx.beginPath();
+      wbCtx.moveTo(pos.x, pos.y);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const pos = getCanvasCoords(e);
+
+      wbCtx.lineWidth = wbTool === 'eraser' ? 20 : 3;
+      wbCtx.lineCap = 'round';
+      wbCtx.strokeStyle = wbTool === 'eraser' ? '#f8fafc' : wbColor;
+
+      wbCtx.lineTo(pos.x, pos.y);
+      wbCtx.stroke();
+    }
+
+    function stopDrawing() {
+      if (isDrawing) {
+        wbCtx.closePath();
+        isDrawing = false;
+      }
+    }
+
+    function clearWhiteboard() {
+      if (!wbCtx || !wbCanvas) return;
+      wbCtx.fillStyle = '#f8fafc';
+      wbCtx.fillRect(0, 0, wbCanvas.width, wbCanvas.height);
+    }
+  </script>
+</body>
+</html>
