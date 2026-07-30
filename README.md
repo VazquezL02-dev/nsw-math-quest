@@ -26,3 +26,10 @@ No Gemini key is needed for this app.
 
 This version removes a leftover JavaScript fragment that prevented the app script
 from running after a student profile was selected.
+
+
+## Final profile-selection fix
+
+A duplicated JavaScript closing line was preventing every button function from
+running. This package has been syntax-checked and the profile buttons now open
+the stage-selection screen.
