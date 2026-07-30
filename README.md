@@ -20,3 +20,9 @@
 5. Embed the Vercel URL in Google Sites.
 
 No Gemini key is needed for this app.
+
+
+## Student selection loading fix
+
+This version removes a leftover JavaScript fragment that prevented the app script
+from running after a student profile was selected.
